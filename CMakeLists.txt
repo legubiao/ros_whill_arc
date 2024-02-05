@@ -14,6 +14,15 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   serial
+
+  sensor_msgs
+  laser_geometry
+  pcl_ros
+  pcl_conversions
+  tf2
+  tf2_ros
+  tf2_sensor_msgs
+  tf2_geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -75,6 +84,8 @@ add_subdirectory(./src/whill)
    DEPENDENCIES
    std_msgs
    ros_whill
+
+   sensor_msgs
  )
 
 ################################################
@@ -140,7 +151,6 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/ros_whill_node.cpp)
 add_executable(ros_whill src/ros_whill.cpp src/odom.cpp src/utils/rotation_tools.cpp src/utils/unit_convert.cpp)
 
-
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -160,6 +170,8 @@ target_link_libraries(ros_whill
   ${catkin_LIBRARIES}
  )
 
+add_executable(laser_scan_fusion src/laser_scan_fusion.cpp)
+target_link_libraries(laser_scan_fusion ${catkin_LIBRARIES})
 #target_link_libraries(ros_whill ${catkin_LIBRARIES})
 
 #############

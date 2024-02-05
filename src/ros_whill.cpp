@@ -112,7 +112,13 @@ void ros_cmd_vel_callback(const geometry_msgs::Twist::ConstPtr &cmd_vel)
 {
     if (whill)
     {
-        whill->setSpeed(cmd_vel->linear.x, cmd_vel->angular.z);
+        int linear = cmd_vel->linear.x * 100.0f;
+        int angular = cmd_vel->angular.z * 100.0f;
+
+        linear = std::max(std::min(linear, 100), -100);
+        angular = std::max(std::min(angular, 100), -100);
+
+        whill->setJoystick(-angular, linear);
     }
 }
 
@@ -268,14 +274,14 @@ void sleep_ms(uint32_t ms){
 //
 
 // Enable cmd_vel Topic
-bool enable_cmd_vel_topic = false;
+bool enable_cmd_vel_topic = true;
 ros::Subscriber cmd_vel_subscriber;
 void activate_cmd_vel_topic(ros::NodeHandle &nh)
 {
     static bool activated = false;
     if (!activated && enable_cmd_vel_topic)
     {
-        cmd_vel_subscriber = nh.subscribe("controller/cmd_vel", 100, ros_cmd_vel_callback);
+        cmd_vel_subscriber = nh.subscribe("/cmd_vel", 100, ros_cmd_vel_callback);
         activated = true;
     }
 }
@@ -407,7 +413,7 @@ int main(int argc, char **argv)
     ros::ServiceServer set_power_service = nh.advertiseService("power", &ros_srv_set_power);
 
     // Subscriber
-    ros::Subscriber joystick_subscriber = nh.subscribe("controller/joy", 100, ros_joystick_callback);
+    ros::Subscriber joystick_subscriber = nh.subscribe("/controller/joy", 100, ros_joystick_callback);
 
     // Publishers
     ros_joystick_state_publisher = nh.advertise<sensor_msgs::Joy>("states/joy", 100);
