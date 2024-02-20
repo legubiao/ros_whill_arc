@@ -1,0 +1,7 @@
+image: /home/biao/catkin_ws/src/ros_whill_arc/maps/cartographer.pgm
+resolution: 0.050000
+origin: [-11.970802, -13.614310, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

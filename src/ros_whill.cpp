@@ -419,7 +419,7 @@ int main(int argc, char **argv)
     ros_joystick_state_publisher = nh.advertise<sensor_msgs::Joy>("states/joy", 100);
     ros_jointstate_publisher = nh.advertise<sensor_msgs::JointState>("states/jointState", 100);
     ros_battery_state_publisher = nh.advertise<sensor_msgs::BatteryState>("states/batteryState", 100);
-    ros_odom_publisher = nh.advertise<nav_msgs::Odometry>("odom", 100);
+    ros_odom_publisher = nh.advertise<nav_msgs::Odometry>("/odom", 100);
 
     // TF Broadcaster
     odom_broadcaster = new tf::TransformBroadcaster;

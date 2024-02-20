@@ -1,0 +1,31 @@
+<launch>
+    <!--加载地图，并启用amcl定位-->
+        <!-- Map Server -->
+    <node pkg="map_server" type="map_server" name="map_server" output="screen" args="$(find ros_whill)/maps/cartographer.yaml"> 
+        <param name="frame_id" value="map"/>
+    </node>
+
+    <arg name="initial_pose_x" default="0.0"/>
+    <arg name="initial_pose_y" default="0.0"/>
+    <arg name="initial_pose_a" default="0.0"/>
+
+    <!-- Localization-->
+    <!-- Note: comment out this node when mapping -->
+    <node pkg="amcl" type="amcl" name="amcl" output="screen">
+        <!--remap from="scan" to="/left_lidar" /-->
+        <param name="odom_frame_id" value="odom"/>
+	    <!--param name="odom_frame_id" value="base_link" /-->
+        <param name="base_frame_id" value="base_link" />
+        <param name="global_frame_id" value="map" />
+        <param name="initial_pose_x" value="$(arg initial_pose_x)" />
+        <param name="initial_pose_y" value="$(arg initial_pose_y)" />
+        <param name="initial_pose_a" value="$(arg initial_pose_a)" />
+	    <param name = "max_particles" value = "20"/>
+    </node>
+
+    <!-- Rviz-->
+    <arg name="rviz" default="true" />
+    <arg name="rviz_file" default="$(find ros_whill)/rviz/e6_engagement_room.rviz" />
+    <node pkg="rviz" type="rviz" name="$(anon rviz)" args="-d $(arg rviz_file)" output="screen" if="$(arg rviz)"/>
+
+</launch>

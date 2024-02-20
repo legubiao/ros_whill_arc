@@ -1,15 +1,14 @@
 <launch>
+    <!--加载机器人的模型文件-->
     <arg name="model" default="$(find ros_whill)/xacro/modelc.xacro" />
-    <arg name="gui" default="true" />
-
     <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
   
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
         <remap from="/joint_states" to="/whill/states/jointState" />
     </node>
 
+    <!--轮椅驱动包-->
     <arg name="serialport" default="$(env TTY_WHILL)"/>
-
     <node pkg="ros_whill" type="ros_whill" name="whill" output="screen" >
 
         <!-- Initial Speed Profile -->
@@ -29,12 +28,11 @@
         
     </node>
 
-    <!-- Joy Node -->
+    <!-- Joy Node 手柄控制节点-->
     <node name="joynode" pkg="joy" type="joy_node" args="" output="screen">
         <param name="autorepeat_rate" value="10"/>
         <param name="dev" value="/dev/input/js0"/>
     </node>
-
     <node name="joy_control" pkg="map_visualizer" type="joy_control" output="screen"/>
 
     <!--Left Lidar 左激光雷达-->
@@ -63,7 +61,7 @@
     </node>
     <node name="baselink_to_right_lidar" pkg="tf2_ros" type="static_transform_publisher" args="-0.11 0.28 0.025 0 -0.6111 -1.5714 frontwheel_left right_lidar" output="screen"/>
 
-    <!-- Sensor Fusion -->
+    <!-- Sensor Fusion 融合左右两个激光雷达的数据-->
     <node name="laser_scan_fusion" pkg="ros_whill" type="laser_scan_fusion">
         <param name="target_frame" value="base_link"/>
         <param name="fused_cloud_topic" value="/fused_cloud"/>
@@ -71,7 +69,6 @@
         <param name="scan1" value="/right_lidar"/>
         <!--param name="scan2" value="/realsense_scan"/-->
     </node>
-
     <node name="fused_cloud_to_fused_scan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node">
         <remap from="cloud_in" to="/fused_cloud"/>
         <remap from="scan" to="/scan"/>
@@ -80,6 +77,9 @@
         <param name="range_min" value="0"/>
         <param name="range_max" value="100"/>
     </node>
-    
+
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+    <node pkg="map_visualizer" type="pose_publisher.py" name="pose_publisher" output="screen" />
+
 </launch>
 
