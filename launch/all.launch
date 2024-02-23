@@ -33,7 +33,7 @@
         <param name="autorepeat_rate" value="10"/>
         <param name="dev" value="/dev/input/js0"/>
     </node>
-    <node name="joy_control" pkg="map_visualizer" type="joy_control" output="screen"/>
+    <node name="joy_control" pkg="ros_whill" type="joy_control" output="screen"/>
 
     <!--Left Lidar 左激光雷达-->
     <node name="left_lidar" pkg="sick_tim" type="sick_tim551_2050001" respawn="false" output="screen">
@@ -79,7 +79,7 @@
     </node>
 
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
-    <node pkg="map_visualizer" type="pose_publisher.py" name="pose_publisher" output="screen" />
+    <node pkg="ros_whill" type="pose_publisher.py" name="pose_publisher" output="screen" />
 
 </launch>
 

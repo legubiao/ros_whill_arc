@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
   serial
 
   sensor_msgs
+  geometry_msgs
+  
   laser_geometry
   pcl_ros
   pcl_conversions
@@ -172,6 +174,9 @@ target_link_libraries(ros_whill
 
 add_executable(laser_scan_fusion src/laser_scan_fusion.cpp)
 target_link_libraries(laser_scan_fusion ${catkin_LIBRARIES})
+
+add_executable(joy_control src/joy_control.cpp)
+target_link_libraries(joy_control ${catkin_LIBRARIES})
 #target_link_libraries(ros_whill ${catkin_LIBRARIES})
 
 #############
@@ -183,10 +188,10 @@ target_link_libraries(laser_scan_fusion ${catkin_LIBRARIES})
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(PROGRAMS
+  scripts/pose_publisher.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables and/or libraries for installation
 # install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
