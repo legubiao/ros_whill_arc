@@ -1,10 +1,10 @@
 #
 #  Initial Speed Profile
 #
-init_speed/forward/speed: 0.567   # [m/s]
+init_speed/forward/speed: 0.500   # [m/s]
 init_speed/forward/acc: 0.23      # [m/ss]
 init_speed/forward/dec: 1.25      # [m/ss]
-init_speed/backward/speed: 0.557  # [m/s]
+init_speed/backward/speed: 0.500  # [m/s]
 init_speed/backward/acc: 0.34     # [m/ss]
 init_speed/backward/dec: 0.89     # [m/ss]
 init_speed/turn/speed: 0.8        # [rad/s]

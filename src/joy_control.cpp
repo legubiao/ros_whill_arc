@@ -10,8 +10,8 @@ public:
         nh_.param<int>("axis_linear_x", axis_lin_x, 1);
         nh_.param<int>("axis_linear_y", axis_lin_y, 0);
         nh_.param<int>("axis_angular", axis_ang, 3);
-        nh_.param<double>("vel_linear", vlinear, 2);
-        nh_.param<double>("vel_angular", vangular, 0.25);
+        nh_.param<double>("vel_linear", vlinear, 0.5);
+        nh_.param<double>("vel_angular", vangular, 0.8);
         nh_.param<int>("button", ton, 4);
 
         pub_ = nh_.advertise<geometry_msgs::Twist>("/cmd_vel", 1);

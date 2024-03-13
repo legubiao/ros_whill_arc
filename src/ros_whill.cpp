@@ -112,8 +112,8 @@ void ros_cmd_vel_callback(const geometry_msgs::Twist::ConstPtr &cmd_vel)
 {
     if (whill)
     {
-        int linear = cmd_vel->linear.x * 100.0f;
-        int angular = cmd_vel->angular.z * 100.0f;
+        int linear = cmd_vel->linear.x /0.5 * 100.0f;
+        int angular = cmd_vel->angular.z /0.8 * 100.0f;
 
         linear = std::max(std::min(linear, 100), -100);
         angular = std::max(std::min(angular, 100), -100);
