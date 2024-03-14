@@ -1,4 +1,0 @@
-<launch>
-    <arg name="model" default="$(find ros_whill)/xacro/modelc.xacro" />
-    <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
-</launch>

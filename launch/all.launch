@@ -78,8 +78,5 @@
         <param name="range_max" value="100"/>
     </node>
 
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
-    <node pkg="ros_whill" type="pose_publisher.py" name="pose_publisher" output="screen" />
-
 </launch>
 
