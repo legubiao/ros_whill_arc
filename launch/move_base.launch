@@ -1,4 +1,6 @@
 <launch>
+    <include file="$(find ros_whill)/launch/basic.launch"/>
+    <include file="$(find ros_whill)/launch/amcl.launch"/>
     <!-- ************ Global: default ************** -->
     <!-- ************ Local : dwa ********* -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
