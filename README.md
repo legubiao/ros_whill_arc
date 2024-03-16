@@ -1,4 +1,17 @@
 # ROS WHILL ARC
+ros_whill_arc is a modified version of ros_whill for NUS ME5400 ARC project. The main differences comparing with the original version are:
+
+<ul>
+  <li>Tested on ROS Noetic</li>
+  <li>Modified Joystick Control</li>
+  <li>Modified CMD_VEL Control</li>
+  <li>Add Lidar to xacro file</li>
+  <li>Add laser scan fusion node</li>
+  <li>Add SLAM launch files</li>
+  <li>Add AMCL and MOVE_BASE launch files</li>
+</ul>
+
+
 ros_whill is a ROS package for [WHILL Model CR](https://whill.jp/model-cr).<br>
 We also have [a FAQ and developers community website](https://whill.zendesk.com/hc/ja) for current and potential Model CR users.<br>
 For general questions and requests, please visit https://whill.zendesk.com/hc/ja .
@@ -11,7 +24,7 @@ For general questions and requests, please visit https://whill.zendesk.com/hc/ja
 ## Installation
 install required ros pkg
 ```
-sudo apt-get install ros-noetic-serial ros-noetic-tf2-sensor-msgs
+sudo apt-get install ros-noetic-serial ros-noetic-pointcloud-to-laserscan ros-noetic-tf2-sensor-msgs
 ```
 
 ## ROS API
@@ -139,10 +152,4 @@ $ roslaunch ros_whill ros_whill.launch
 ### Set serial port as an argument of the launch file
 ```sh
 roslaunch ros_whill ros_whill.launch serialport:=/dev/[YOUR SERIAL PORT DEVICE]
-```
-
-## Install Dependencies
-
-```sh
-sudo apt-get install ros-noetic-serial ros-noetic-pointcloud-to-laserscan ros-noetic-tf2-sensor-msgs
 ```
