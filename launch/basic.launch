@@ -1,6 +1,6 @@
 <launch>
     <!--加载机器人的模型文件-->
-    <arg name="model" default="$(find ros_whill)/xacro/modelc.xacro" />
+    <arg name="model" default="$(find ros_whill)/xacro/modelc_with_lidar.xacro" />
     <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
   
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
@@ -46,7 +46,7 @@
         <param name="frame_id" type="str" value="left_lidar"/>
         <remap from="scan" to="/left_lidar"/>
     </node>
-    <node name="baselink_to_left_lidar" pkg="tf2_ros" type="static_transform_publisher" args="-0.11 0.28 -0.025 0 0.6111 -1.5714 frontwheel_right left_lidar" output="screen"/>
+    <!-- <node name="baselink_to_left_lidar" pkg="tf2_ros" type="static_transform_publisher" args="-0.11 0.28 -0.025 0 0.6111 -1.5714 frontwheel_right left_lidar" output="screen"/> -->
     
     <!--Right Lidar 右激光雷达-->
     <node name="right_lidar" pkg="sick_tim" type="sick_tim551_2050001" respawn="false" output="screen">
@@ -59,7 +59,7 @@
         <param name="frame_id" type="str" value="right_lidar"/>
         <remap from="scan" to="/right_lidar"/>
     </node>
-    <node name="baselink_to_right_lidar" pkg="tf2_ros" type="static_transform_publisher" args="-0.11 0.28 0.025 0 -0.6111 -1.5714 frontwheel_left right_lidar" output="screen"/>
+    <!-- <node name="baselink_to_right_lidar" pkg="tf2_ros" type="static_transform_publisher" args="-0.11 0.28 0.025 0 -0.6111 -1.5714 frontwheel_left right_lidar" output="screen"/> -->
 
     <!-- Sensor Fusion 融合左右两个激光雷达的数据-->
     <node name="laser_scan_fusion" pkg="ros_whill" type="laser_scan_fusion">

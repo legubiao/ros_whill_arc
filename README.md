@@ -8,6 +8,12 @@ For general questions and requests, please visit https://whill.zendesk.com/hc/ja
 ## Requirements
 - ROS Noetic
 
+## Installation
+install required ros pkg
+```
+sudo apt-get install ros-noetic-serial ros-noetic-tf2-sensor-msgs
+```
+
 ## ROS API
 
 ### Subscribed Topics
@@ -86,6 +92,10 @@ Edit your `~/.bashrc` (bash) or `~/.zshrc` (zsh) to add this line:
 
 ```sh
 export TTY_WHILL=/dev/[YOUR SERIAL PORT DEVICE]
+```
+for example
+```sh
+echo "export TTY_WHILL=/dev/ttyUSB0" >> ~/.bashrc
 ```
 Setting will be applied automatically from next shell starting or booting up.
 
