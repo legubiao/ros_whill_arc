@@ -89,7 +89,9 @@ ros::Publisher ros_odom_publisher;
 
 // TF Broadcaster
 tf::TransformBroadcaster *odom_broadcaster = nullptr;
-tf::TransformListener *listener = nullptr;
+tf::TransformListener *tf_listener;
+
+tf::StampedTransform imu_base_transform;
 
 //
 // ROS Callbacks
@@ -325,28 +327,8 @@ void whill_callback_data1(WHILL *caller)
     imu.linear_acceleration.z = caller->accelerometer.z * 9.80665 * ACC_CONST; // G to m/ss
     ros_imu_publisher.publish(imu);
 
-    tf::StampedTransform transform;
-    try{
-        listener->lookupTransform("base_link", "imu",  
-                                 ros::Time(0), transform);
-    }
-    catch (tf::TransformException &ex) {
-        ROS_ERROR("%s",ex.what());
-        ros::Duration(1.0).sleep();
-        return;
-    }
-
-    tf::Vector3 accel(imu.linear_acceleration.x,
-                      imu.linear_acceleration.y,
-                      imu.linear_acceleration.z);
-
-    tf::Vector3 accel_base = transform * accel;
-
-    tf::Vector3 gyro(imu.angular_velocity.x,
-                     imu.angular_velocity.y,
-                     imu.angular_velocity.z);
-
-    tf::Vector3 gyro_base = transform * gyro;
+    tf::Vector3 accel_base = imu_base_transform * tf::Vector3(imu.linear_acceleration.x, imu.linear_acceleration.y, imu.linear_acceleration.z);
+    tf::Vector3 gyro_base = imu_base_transform * tf::Vector3(imu.angular_velocity.x, imu.angular_velocity.y, imu.angular_velocity.z);
 
         // 然后你可以创建一个新的IMU消息，并将转换后的数据发布到新的主题上
     sensor_msgs::Imu imu_base;
@@ -491,8 +473,7 @@ int main(int argc, char **argv)
 
     // TF Broadcaster
     odom_broadcaster = new tf::TransformBroadcaster;
-    listener = new tf::TransformListener;
-    
+    tf_listener = new tf::TransformListener;
 
     // Parameters
     // WHILL Report Packet Interval
@@ -560,6 +541,20 @@ int main(int argc, char **argv)
         whill->register_callback(whill_callback_data1, WHILL::EVENT::CALLBACK_DATA1);
         whill->register_callback(whill_callback_powered_on, WHILL::EVENT::CALLBACK_POWER_ON);
 
+        while (ros::ok())
+        {
+             // get imu_base_transform
+            try{
+                tf_listener->lookupTransform("base_link", "imu",  
+                                                ros::Time(0), imu_base_transform);
+                ROS_INFO("Got Transform from imu to base_link.");
+                break;
+            }
+            catch (tf::TransformException &ex) {
+                ROS_ERROR("%s",ex.what());
+                ros::Duration(1.0).sleep();
+            }
+        }
 
         // Initial Speed Profile
         ros_whill::SetSpeedProfile::Request init_speed_req;
