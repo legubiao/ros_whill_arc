@@ -43,6 +43,7 @@ SOFTWARE.
 #include "ros_whill/SetSpeedProfile.h"
 
 #include "tf/transform_broadcaster.h"
+#include <tf/transform_listener.h>
 
 #include "whill/WHILL.h"
 #include "serial/serial.h" // wjwood/Serial (ros-melodic-serial)
@@ -82,11 +83,13 @@ void safeDelete(T *&p)
 ros::Publisher ros_joystick_state_publisher;
 ros::Publisher ros_jointstate_publisher;
 ros::Publisher ros_imu_publisher;
+ros::Publisher ros_base_imu_publisher;
 ros::Publisher ros_battery_state_publisher;
 ros::Publisher ros_odom_publisher;
 
 // TF Broadcaster
 tf::TransformBroadcaster *odom_broadcaster = nullptr;
+tf::TransformListener *listener = nullptr;
 
 //
 // ROS Callbacks
@@ -322,6 +325,47 @@ void whill_callback_data1(WHILL *caller)
     imu.linear_acceleration.z = caller->accelerometer.z * 9.80665 * ACC_CONST; // G to m/ss
     ros_imu_publisher.publish(imu);
 
+    tf::StampedTransform transform;
+    try{
+        listener->lookupTransform("base_link", "imu",  
+                                 ros::Time(0), transform);
+    }
+    catch (tf::TransformException &ex) {
+        ROS_ERROR("%s",ex.what());
+        ros::Duration(1.0).sleep();
+        return;
+    }
+
+    tf::Vector3 accel(imu.linear_acceleration.x,
+                      imu.linear_acceleration.y,
+                      imu.linear_acceleration.z);
+
+    tf::Vector3 accel_base = transform * accel;
+
+    tf::Vector3 gyro(imu.angular_velocity.x,
+                     imu.angular_velocity.y,
+                     imu.angular_velocity.z);
+
+    tf::Vector3 gyro_base = transform * gyro;
+
+        // 然后你可以创建一个新的IMU消息，并将转换后的数据发布到新的主题上
+    sensor_msgs::Imu imu_base;
+    imu_base.header.stamp = currentTime;
+    imu_base.header.frame_id = "base_link";
+
+    imu_base.linear_acceleration.x = accel_base.x();
+    imu_base.linear_acceleration.y = accel_base.y();
+    imu_base.linear_acceleration.z = accel_base.z();
+
+    imu_base.angular_velocity.x = gyro_base.x();
+    imu_base.angular_velocity.y = gyro_base.y();
+    imu_base.angular_velocity.z = gyro_base.z();
+
+    // 注意，这里我们只转换了线性加速度和角速度，如果你需要，你也可以转换方向
+    // ...
+
+    ros_base_imu_publisher.publish(imu_base);
+
 
     // Battery
     sensor_msgs::BatteryState batteryState;
@@ -441,11 +485,14 @@ int main(int argc, char **argv)
     ros_joystick_state_publisher = nh.advertise<sensor_msgs::Joy>("states/joy", 100);
     ros_jointstate_publisher = nh.advertise<sensor_msgs::JointState>("states/jointState", 100);
     ros_imu_publisher = nh.advertise<sensor_msgs::Imu>("states/imu", 100);
+    ros_base_imu_publisher = nh.advertise<sensor_msgs::Imu>("states/imu/base", 100);
     ros_battery_state_publisher = nh.advertise<sensor_msgs::BatteryState>("states/batteryState", 100);
     ros_odom_publisher = nh.advertise<nav_msgs::Odometry>("/odom", 100);
 
     // TF Broadcaster
     odom_broadcaster = new tf::TransformBroadcaster;
+    listener = new tf::TransformListener;
+    
 
     // Parameters
     // WHILL Report Packet Interval
