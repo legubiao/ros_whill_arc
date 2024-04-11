@@ -1,4 +1,4 @@
-tf/*
+/*
 MIT License
 
 Copyright (c) 2018 WHILL inc.
