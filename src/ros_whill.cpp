@@ -1,4 +1,4 @@
-/*
+tf/*
 MIT License
 
 Copyright (c) 2018 WHILL inc.
@@ -313,13 +313,13 @@ void whill_callback_data1(WHILL *caller)
 
     imu.orientation_covariance[0] = -1; // Orientation is unknown
 
-    imu.angular_velocity.x = caller->gyro.x / 180 * M_PI * ACC_CONST; // deg per sec to rad/s
-    imu.angular_velocity.y = caller->gyro.y / 180 * M_PI * ACC_CONST; // deg per sec to rad/s
-    imu.angular_velocity.z = caller->gyro.z / 180 * M_PI * ACC_CONST; // deg per sec to rad/s
+    imu.angular_velocity.x = caller->gyro.x / 180 * M_PI * GYR_CONST; // deg per sec to rad/s
+    imu.angular_velocity.y = caller->gyro.y / 180 * M_PI * GYR_CONST; // deg per sec to rad/s
+    imu.angular_velocity.z = caller->gyro.z / 180 * M_PI * GYR_CONST; // deg per sec to rad/s
 
-    imu.linear_acceleration.x = caller->accelerometer.x * 9.80665 * GYR_CONST; // G to m/ss
-    imu.linear_acceleration.y = caller->accelerometer.y * 9.80665 * GYR_CONST; // G to m/ssnav_msgs::Odometry odom_msg = odom.getROSOdometry();
-    imu.linear_acceleration.z = caller->accelerometer.z * 9.80665 * GYR_CONST; // G to m/ss
+    imu.linear_acceleration.x = caller->accelerometer.x * 9.80665 * ACC_CONST; // G to m/ss
+    imu.linear_acceleration.y = caller->accelerometer.y * 9.80665 * ACC_CONST; // G to m/ssnav_msgs::Odometry odom_msg = odom.getROSOdometry();
+    imu.linear_acceleration.z = caller->accelerometer.z * 9.80665 * ACC_CONST; // G to m/ss
     ros_imu_publisher.publish(imu);
 
 
