@@ -175,8 +175,6 @@ target_link_libraries(ros_whill
 add_executable(laser_scan_fusion src/laser_scan_fusion.cpp)
 target_link_libraries(laser_scan_fusion ${catkin_LIBRARIES})
 
-add_executable(joy_control src/joy_control.cpp)
-target_link_libraries(joy_control ${catkin_LIBRARIES})
 #target_link_libraries(ros_whill ${catkin_LIBRARIES})
 
 #############

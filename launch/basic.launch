@@ -24,8 +24,9 @@
         <param name="serialport" value="$(arg serialport)"/>
 
         <!-- Output Odometry tf or not. If other node publishes odom->base_link tf, Change value to "false" -->
-        <param name="publish_tf" value="true"/>  
-        
+        <param name="publish_tf" value="true"/> 
+        <param name="publish_base_imu" value="true"/> 
+        <remap from="/controller/joy" to="/joy"/>
     </node>
 
     <!-- Joy Node 手柄控制节点-->
@@ -33,7 +34,6 @@
         <param name="autorepeat_rate" value="10"/>
         <param name="dev" value="/dev/input/js0"/>
     </node>
-    <node name="joy_control" pkg="ros_whill" type="joy_control" output="screen"/>
 
     <!--Left Lidar 左激光雷达-->
     <node name="left_lidar" pkg="sick_tim" type="sick_tim551_2050001" respawn="false" output="screen">

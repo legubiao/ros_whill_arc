@@ -64,6 +64,8 @@ Odometry odom;
 // Global Parameters
 int interval = 0;       // WHILL Data frequency
 bool publish_tf = true; // Enable publishing Odometry TF
+bool publish_base_imu = false; // Enable publishing Base IMU
+int axis_ang, axis_lin_x, axis_lin_y, ton;
 ros::Time last_received;
 
 template <typename T>
@@ -98,23 +100,15 @@ tf::StampedTransform imu_base_transform;
 //
 void ros_joystick_callback(const sensor_msgs::Joy::ConstPtr &joy)
 {
-    // Transform [-1.0,1.0] to [-100,100]
-    int joy_x = -joy->axes[0] * 100.0f;
-    int joy_y = joy->axes[1] * 100.0f;
-
-    // value check
-    if (joy_y < -100)
-        joy_y = -100;
-    if (joy_y > 100)
-        joy_y = 100;
-    if (joy_x < -100)
-        joy_x = -100;
-    if (joy_x > 100)
-        joy_x = 100;
-
-    if (whill)
+    if (joy->buttons[ton] && whill)
     {
-        whill->setJoystick(joy_x, joy_y);
+        int linear = joy->axes[axis_lin_x]* 100.0f;
+        int angular = -joy->axes[axis_ang] * 100.0f;
+
+        linear = std::max(std::min(linear, 100), -100);
+        angular = -std::max(std::min(angular, 100), -100);
+
+        whill->setJoystick(-angular, linear);
     }
 }
 
@@ -492,6 +486,13 @@ int main(int argc, char **argv)
 
     // Disable publishing odometry tf
     nh.param<bool>("publish_tf", publish_tf, true);
+    nh.param<bool>("publish_base_imu", publish_base_imu, false);
+
+    // Joy Control
+    nh.param<int>("axis_linear_x", axis_lin_x, 1);
+    nh.param<int>("axis_angular", axis_ang, 3);
+    nh.param<int>("button", ton, 4);
+    
 
 
     bool keep_connected;
@@ -541,21 +542,25 @@ int main(int argc, char **argv)
         whill->register_callback(whill_callback_data1, WHILL::EVENT::CALLBACK_DATA1);
         whill->register_callback(whill_callback_powered_on, WHILL::EVENT::CALLBACK_POWER_ON);
 
-        while (ros::ok())
+        if (publish_base_imu) 
         {
-             // get imu_base_transform
-            try{
-                tf_listener->lookupTransform("base_link", "imu",  
-                                                ros::Time(0), imu_base_transform);
-                ROS_INFO("Got Transform from imu to base_link.");
-                break;
-            }
-            catch (tf::TransformException &ex) {
-                ROS_ERROR("%s",ex.what());
-                ros::Duration(1.0).sleep();
+            while (ros::ok())
+            {
+                // get imu_base_transform
+                try{
+                    tf_listener->lookupTransform("base_link", "imu",  
+                                                    ros::Time(0), imu_base_transform);
+                    ROS_INFO("Got Transform from imu to base_link.");
+                    break;
+                }
+                catch (tf::TransformException &ex) {
+                    ROS_ERROR("%s",ex.what());
+                    ros::Duration(1.0).sleep();
+                }
             }
         }
 
+        
         // Initial Speed Profile
         ros_whill::SetSpeedProfile::Request init_speed_req;
         if (nh.getParam("init_speed/forward/speed", init_speed_req.forward.speed) &&
