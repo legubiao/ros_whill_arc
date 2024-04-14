@@ -2,7 +2,7 @@
 ros_whill_arc is a modified version of ros_whill for NUS ME5400 ARC project. The main differences comparing with the original version are:
 
 <ul>
-  <li>Tested on ROS Noetic</li>
+  <li>Tested on ROS2 Foxy</li>
   <li>Modified Joystick Control</li>
   <li>Modified CMD_VEL Control</li>
   <li>Add Lidar to xacro file</li>
@@ -19,12 +19,12 @@ For general questions and requests, please visit https://whill.zendesk.com/hc/ja
 <img src="https://user-images.githubusercontent.com/2618822/45492944-89421c00-b7a8-11e8-9c92-22aa3f28f6e4.png" width=30%>
 
 ## Requirements
-- ROS Noetic
+- ROS2 Foxy
 
 ## Installation
-install required ros pkg
+install required ros2 pkg
 ```
-sudo apt-get install ros-noetic-serial ros-noetic-pointcloud-to-laserscan ros-noetic-tf2-sensor-msgs
+sudo apt-get install ros-foxy-serial-driver ros-foxy-pointcloud-to-laserscan ros-foxy-tf2-sensor-msgs
 ```
 
 ## ROS API
