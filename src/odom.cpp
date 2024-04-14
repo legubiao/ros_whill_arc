@@ -18,12 +18,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "ros/ros.h"
 
-#include "sensor_msgs/JointState.h"
-#include "nav_msgs/Odometry.h"
-#include "geometry_msgs/TransformStamped.h"
-#include "tf/transform_broadcaster.h"
+#include "sensor_msgs/msg/joint_state.hpp"
+#include "nav_msgs/msg/odometry.hpp"
+#include "geometry_msgs/msg/transform_stamped.hpp"
+
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+
 
 #include "./odom.h"
 
@@ -67,7 +69,7 @@ void Odometry::setParameters(double _wheel_radius, double _wheel_tread){
     this->wheel_tread = _wheel_tread;
 }
 
-void Odometry::update(sensor_msgs::JointState jointState, double dt)
+void Odometry::update(sensor_msgs::msg::JointState jointState, double dt)
 {
     if (dt == 0)
         return;
@@ -118,11 +120,13 @@ Odometry::Space2D Odometry::getOdom()
     return pose;
 }
 
-nav_msgs::Odometry Odometry::getROSOdometry()
+nav_msgs::msg::Odometry Odometry::getROSOdometry()
 {
-    nav_msgs::Odometry odom;
+    nav_msgs::msg::Odometry odom;
 
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromRollPitchYaw(0, 0, pose.theta);
+    tf2::Quaternion q;
+    q.setRPY(0, 0, pose.theta);
+    geometry_msgs::msg::Quaternion odom_quat = tf2::toMsg(q);
 
     // position
     odom.pose.pose.position.x = pose.x;
@@ -141,17 +145,18 @@ nav_msgs::Odometry Odometry::getROSOdometry()
     return odom;
 }
 
-geometry_msgs::TransformStamped Odometry::getROSTransformStamped()
+geometry_msgs::msg::TransformStamped Odometry::getROSTransformStamped()
 {
 
-    geometry_msgs::TransformStamped odom_trans;
-
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromRollPitchYaw(0, 0, pose.theta);
+    geometry_msgs::msg::TransformStamped odom_trans;
 
     odom_trans.transform.translation.x = pose.x;
     odom_trans.transform.translation.y = pose.y;
     odom_trans.transform.translation.z = base_link_height;
-    odom_trans.transform.rotation = tf::createQuaternionMsgFromYaw(pose.theta);
+
+    tf2::Quaternion q;
+    q.setRPY(0, 0, pose.theta);
+    odom_trans.transform.rotation = tf2::toMsg(q);
 
     return odom_trans;
 }
