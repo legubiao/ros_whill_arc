@@ -197,8 +197,8 @@ public:
         int speed;
     } Motor;
 
-    Data3D accelerometer = {0};
-    Data3D gyro = {0};
+    Data3D accelerometer = {0, 0, 0};
+    Data3D gyro = {0, 0, 0};
 
     Joy virtual_joy = {0};
     Joy joy = {0};

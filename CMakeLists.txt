@@ -19,14 +19,26 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(ros_whill REQUIRED)
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-add_executable(ros2_whill src/ros2_whill.cpp src/odom.cpp)
-ament_target_dependencies(ros2_whill rclcpp std_srvs)
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/SpeedPack.msg"
+  "srv/SetSpeedProfile.srv"
+)
 
-install(TARGETS ros2_whill
+add_subdirectory(./src/whill) 
+
+add_executable(ros2_whill src/ros2_whill.cpp src/odom.cpp src/utils/rotation_tools.cpp src/utils/unit_convert.cpp)
+ament_target_dependencies(ros2_whill rclcpp std_srvs ros_whill)
+target_link_libraries(ros2_whill lib_whill)
+
+install(TARGETS 
+  ros2_whill
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
