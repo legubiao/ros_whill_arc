@@ -20,11 +20,17 @@ For general questions and requests, please visit https://whill.zendesk.com/hc/ja
 
 ## Requirements
 - ROS2 Foxy
+- [serial](https://github.com/ZhaoXiangBox/serial)
 
 ## Installation
 install required ros2 pkg
 ```
 sudo apt-get install ros-foxy-serial-driver ros-foxy-pointcloud-to-laserscan ros-foxy-tf2-sensor-msgs
+```
+
+install ros2 pkg for mapping and navigation
+```
+sudo apt-get install ros-foxy-sick-scan2 ros-foxy-pcl-ros ros-foxy-cartographer-ros ros-foxy-cartographer
 ```
 
 ## ROS API

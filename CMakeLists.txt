@@ -26,6 +26,9 @@ find_package(tf2_ros REQUIRED)
 find_package(serial REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(ros_whill REQUIRED)
+find_package(pcl_conversions REQUIRED)
+find_package(PCL REQUIRED COMPONENTS common io)
+find_package(laser_geometry REQUIRED)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
@@ -42,8 +45,19 @@ add_executable(ros2_whill src/ros2_whill.cpp src/odom.cpp src/utils/rotation_too
 ament_target_dependencies(ros2_whill rclcpp std_srvs sensor_msgs nav_msgs geometry_msgs tf2_ros ros_whill serial)
 target_link_libraries(ros2_whill lib_whill)
 
+add_executable(scan_fusion src/scan_fusion.cpp)
+ament_target_dependencies(scan_fusion 
+  rclcpp
+  sensor_msgs
+  laser_geometry
+  sensor_msgs
+  tf2_ros
+  PCL
+  pcl_conversions)
+
 install(TARGETS 
   ros2_whill
+  scan_fusion
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
@@ -62,6 +76,8 @@ install(DIRECTORY
   launch
   xacro
   params
+  config
+  rviz
   DESTINATION share/${PROJECT_NAME}/
 )
 
