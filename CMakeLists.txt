@@ -21,6 +21,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(serial REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
@@ -38,7 +39,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 add_subdirectory(./src/whill) 
 
 add_executable(ros2_whill src/ros2_whill.cpp src/odom.cpp src/utils/rotation_tools.cpp src/utils/unit_convert.cpp)
-ament_target_dependencies(ros2_whill rclcpp std_srvs sensor_msgs nav_msgs tf2_ros ros_whill serial)
+ament_target_dependencies(ros2_whill rclcpp std_srvs sensor_msgs nav_msgs geometry_msgs tf2_ros ros_whill serial)
 target_link_libraries(ros2_whill lib_whill)
 
 install(TARGETS 
@@ -59,6 +60,8 @@ endif()
 # Install launch files.
 install(DIRECTORY
   launch
+  xacro
+  params
   DESTINATION share/${PROJECT_NAME}/
 )
 

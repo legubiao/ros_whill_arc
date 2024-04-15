@@ -6,6 +6,8 @@
 #include "unistd.h"
 
 #include <chrono>
+#include <memory>
+#include <functional>
 
 
 #include "rclcpp/rclcpp.hpp"
@@ -17,6 +19,7 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "sensor_msgs/msg/battery_state.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 #include "tf2_ros/transform_broadcaster.h"
 #include "tf2_ros/transform_listener.h"
 
@@ -28,6 +31,8 @@
 #include "odom.h"
 #include "whill/WHILL.h"
 #include "serial/serial.h"
+
+using std::placeholders::_1;
 
 class WHillNode;
 void whill_callback_data1(WHILL *caller);
@@ -47,6 +52,7 @@ void safeDelete(T *&p)
     }
 }
 
+WHILL *whill = nullptr;
 serial::Serial *ser = nullptr;
 int interval = 0;    
 Odometry odom; 
@@ -119,8 +125,15 @@ class WHillNode : public rclcpp::Node
             );
 
             // Subscriber
-            joy_subscription_ = this->create_subscription<sensor_msgs::msg::Joy>(
-                "topic", 100, std::bind(&WHillNode::joystick_callback, this, std::placeholders::_1));
+            joy_subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
+                "/joy", 10, std::bind(&WHillNode::joystick_callback, this, _1));
+
+            if (enable_cmd_vel_topic)
+            {
+                RCLCPP_INFO(this->get_logger(), "Enable cmd_vel topic");
+                vel_subscriber_ = this->create_subscription<geometry_msgs::msg::Twist>(
+                    "/cmd_vel", 10, std::bind(&WHillNode::cmd_vel_callback, this, _1));
+            }
 
             // Publisher
             whill_joy_publisher_ = this->create_publisher<sensor_msgs::msg::Joy>("states/joy", 100);
@@ -154,6 +167,17 @@ class WHillNode : public rclcpp::Node
             this->declare_parameter("publish_base_imu", false);
             this->get_parameter("publish_base_imu", publish_base_imu);
 
+            // speed profile parameter
+            this->declare_parameter("init_speed/forward/speed");
+            this->declare_parameter("init_speed/forward/acc");
+            this->declare_parameter("init_speed/forward/dec");
+            this->declare_parameter("init_speed/backward/speed");
+            this->declare_parameter("init_speed/backward/acc");
+            this->declare_parameter("init_speed/backward/dec");
+            this->declare_parameter("init_speed/turn/speed");
+            this->declare_parameter("init_speed/turn/acc");
+            this->declare_parameter("init_speed/turn/dec");
+            
             // WHILL Parameters
             this->declare_parameter("keep_connected", false);
             this->get_parameter("keep_connected", keep_connected);
@@ -166,6 +190,13 @@ class WHillNode : public rclcpp::Node
                 interval = 10;
             }
             RCLCPP_INFO(this->get_logger(), "param: send_interval=%d", interval);
+
+            // 创建一个新线程来处理回调函数
+            std::thread([this]() {
+                rclcpp::executors::SingleThreadedExecutor executor;
+                executor.add_node(shared_from_this());
+                executor.spin();
+            }).detach();
         }
 
         void run()
@@ -220,6 +251,7 @@ class WHillNode : public rclcpp::Node
                     this->get_parameter("init_speed/turn/dec", init_speed_req.turn.dec)
                 )
                 {
+                    RCLCPP_INFO(this->get_logger(), "Setting Initial Profile");
                     ros_whill::srv::SetSpeedProfile::Response res;
                     auto init_speed_req_ptr = std::make_shared<ros_whill::srv::SetSpeedProfile::Request>(init_speed_req);
                     auto res_ptr = std::make_shared<ros_whill::srv::SetSpeedProfile::Response>(res);
@@ -236,7 +268,6 @@ class WHillNode : public rclcpp::Node
                 while (rclcpp::ok())
                 {
                     whill->refresh();
-                    // activate_cmd_vel_topic(nh);
                     rate.sleep();
                     if (keep_connected && (abs((last_received - this->get_clock()->now()).seconds()) > 2.0))
                     {
@@ -398,16 +429,31 @@ class WHillNode : public rclcpp::Node
             }
         }
 
+        void cmd_vel_callback(
+            const geometry_msgs::msg::Twist::SharedPtr msg)
+        {
+            RCLCPP_INFO(this->get_logger(), "Vel Callback");
+            if (whill)
+            {
+                int linear = msg->linear.x * 100.0f;
+                int angular = -msg->angular.z * 100.0f;
+
+                linear = std::max(std::min(linear, 100), -100);
+                angular = -std::max(std::min(angular, 100), -100);
+
+                whill->setJoystick(-angular, linear);
+            }
+        }
+
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr odom_clear_service_;
         rclcpp::Service<ros_whill::srv::SetSpeedProfile>::SharedPtr set_speed_profile_service_;
         rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr set_power_service_;
 
-        rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscription_;
+        rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscriber_;
+        rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr vel_subscriber_;
 
         std::shared_ptr<tf2_ros::TransformListener> tf_listener_{nullptr};
         std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
-
-        WHILL *whill = nullptr;
 
         int axis_ang, axis_lin_x, ton;
         bool keep_connected;
