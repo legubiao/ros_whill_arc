@@ -30,7 +30,7 @@ sudo apt-get install ros-foxy-serial-driver ros-foxy-pointcloud-to-laserscan ros
 
 install ros2 pkg for mapping and navigation
 ```
-sudo apt-get install ros-foxy-sick-scan2 ros-foxy-pcl-ros ros-foxy-cartographer-ros ros-foxy-cartographer
+sudo apt-get install ros-foxy-sick-scan2 ros-foxy-pcl-ros ros-foxy-cartographer-ros ros-foxy-cartographer ros-foxy-navigation2 ros-foxy-nav2-bringup
 ```
 
 ## ROS API
