@@ -26,7 +26,8 @@
         <!-- Output Odometry tf or not. If other node publishes odom->base_link tf, Change value to "false" -->
         <param name="publish_tf" value="true"/> 
         <param name="publish_base_imu" value="true"/> 
-        <remap from="/controller/joy" to="/joy"/>
+        <remap from="/whill/controller/joy" to="/joy"/>
+        <remap from="/whill/controller/cmd_vel" to="/cmd_vel"/>
     </node>
 
     <!-- Joy Node 手柄控制节点-->

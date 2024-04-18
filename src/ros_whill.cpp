@@ -285,7 +285,7 @@ void activate_cmd_vel_topic(ros::NodeHandle &nh)
     static bool activated = false;
     if (!activated && enable_cmd_vel_topic)
     {
-        cmd_vel_subscriber = nh.subscribe("/cmd_vel", 100, ros_cmd_vel_callback);
+        cmd_vel_subscriber = nh.subscribe("controller/cmd_vel", 100, ros_cmd_vel_callback);
         activated = true;
     }
 }
@@ -455,7 +455,7 @@ int main(int argc, char **argv)
     ros::ServiceServer set_power_service = nh.advertiseService("power", &ros_srv_set_power);
 
     // Subscriber
-    ros::Subscriber joystick_subscriber = nh.subscribe("/controller/joy", 100, ros_joystick_callback);
+    ros::Subscriber joystick_subscriber = nh.subscribe("controller/joy", 100, ros_joystick_callback);
 
     // Publishers
     ros_joystick_state_publisher = nh.advertise<sensor_msgs::Joy>("states/joy", 100);
@@ -463,7 +463,7 @@ int main(int argc, char **argv)
     ros_imu_publisher = nh.advertise<sensor_msgs::Imu>("states/imu", 100);
     ros_base_imu_publisher = nh.advertise<sensor_msgs::Imu>("states/imu/base", 100);
     ros_battery_state_publisher = nh.advertise<sensor_msgs::BatteryState>("states/batteryState", 100);
-    ros_odom_publisher = nh.advertise<nav_msgs::Odometry>("/odom", 100);
+    ros_odom_publisher = nh.advertise<nav_msgs::Odometry>("states/odom", 100);
 
     // TF Broadcaster
     odom_broadcaster = new tf::TransformBroadcaster;
