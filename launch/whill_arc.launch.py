@@ -44,9 +44,15 @@ def generate_launch_description():
             executable='ros2_whill',
             name='ros2_whill', 
             output='screen',
+            namespace='whill',
             parameters=[
                 whill_speed_config,
                 {'send_interval': 10}
-            ]
+            ],
+                remappings=[
+                ('/whill/controller/joy', '/joy'),
+                ('/whill/controller/cmd_vel', '/cmd_vel'),
+                ('/whill/states/odom', '/odom')
+            ],
         )
     ])

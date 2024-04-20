@@ -8,11 +8,11 @@ def generate_launch_description():
     return LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                [ThisLaunchFileDir(), '/whill.py'])
+                [ThisLaunchFileDir(), '/whill_arc.launch.py'])
         ),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                [ThisLaunchFileDir(), '/lidar.py'])
+                [ThisLaunchFileDir(), '/lidar.launch.py'])
         ),
     ])

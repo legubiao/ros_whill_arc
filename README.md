@@ -1,5 +1,5 @@
-# ROS WHILL ARC
-ros_whill_arc is a modified version of ros_whill for NUS ME5400 ARC project. The main differences comparing with the original version are:
+# ROS2 WHILL ARC
+This is a modified version of ros_whill for NUS ME5400 ARC project. The main differences comparing with the original version are:
 
 <ul>
   <li>Tested on ROS2 Foxy</li>
@@ -8,15 +8,8 @@ ros_whill_arc is a modified version of ros_whill for NUS ME5400 ARC project. The
   <li>Add Lidar to xacro file</li>
   <li>Add laser scan fusion node</li>
   <li>Add SLAM launch files</li>
-  <li>Add AMCL and MOVE_BASE launch files</li>
+  <li>Add cartographer and navigation2 launch files</li>
 </ul>
-
-
-ros_whill is a ROS package for [WHILL Model CR](https://whill.jp/model-cr).<br>
-We also have [a FAQ and developers community website](https://whill.zendesk.com/hc/ja) for current and potential Model CR users.<br>
-For general questions and requests, please visit https://whill.zendesk.com/hc/ja .
-
-<img src="https://user-images.githubusercontent.com/2618822/45492944-89421c00-b7a8-11e8-9c92-22aa3f28f6e4.png" width=30%>
 
 ## Requirements
 - ROS2 Foxy
@@ -32,6 +25,14 @@ install ros2 pkg for mapping and navigation
 ```
 sudo apt-get install ros-foxy-sick-scan2 ros-foxy-pcl-ros ros-foxy-cartographer-ros ros-foxy-cartographer ros-foxy-navigation2 ros-foxy-nav2-bringup
 ```
+## Original Introduction
+ros_whill is a ROS package for [WHILL Model CR](https://whill.jp/model-cr).<br>
+We also have [a FAQ and developers community website](https://whill.zendesk.com/hc/ja) for current and potential Model CR users.<br>
+For general questions and requests, please visit https://whill.zendesk.com/hc/ja .
+
+<img src="https://user-images.githubusercontent.com/2618822/45492944-89421c00-b7a8-11e8-9c92-22aa3f28f6e4.png" width=30%>
+
+
 
 ## ROS API
 

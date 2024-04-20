@@ -21,7 +21,6 @@
 #include "sensor_msgs/msg/battery_state.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "tf2_ros/transform_broadcaster.h"
-#include "tf2_ros/transform_listener.h"
 
 #include "ros_whill/msg/speed_pack.hpp"
 #include "ros_whill/srv/set_speed_profile.hpp"
@@ -126,27 +125,24 @@ class WHillNode : public rclcpp::Node
 
             // Subscriber
             joy_subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
-                "/joy", 10, std::bind(&WHillNode::joystick_callback, this, _1));
+                "controller/joy", 10, std::bind(&WHillNode::joystick_callback, this, _1));
 
             if (enable_cmd_vel_topic)
             {
                 RCLCPP_INFO(this->get_logger(), "Enable cmd_vel topic");
                 vel_subscriber_ = this->create_subscription<geometry_msgs::msg::Twist>(
-                    "/cmd_vel", 10, std::bind(&WHillNode::cmd_vel_callback, this, _1));
+                    "controller/cmd_vel", 10, std::bind(&WHillNode::cmd_vel_callback, this, _1));
             }
 
             // Publisher
             whill_joy_publisher_ = this->create_publisher<sensor_msgs::msg::Joy>("states/joy", 100);
             jointstate_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("states/jointState", 100);
             imu_publisher_ = this->create_publisher<sensor_msgs::msg::Imu>("states/imu", 100);
-            base_imu_publisher_ = this->create_publisher<sensor_msgs::msg::Imu>("states/imu/base", 100);
             battery_state_publisher_ = this->create_publisher<sensor_msgs::msg::BatteryState>("states/batteryState", 100);
-            odom_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("/odom", 100);
+            odom_publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("states/odom", 100);
 
             // TF Broadcaster and Listener
             odom_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
-            tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
-            tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
             // Parameters
             this->declare_parameter("serialport", "/dev/ttyUSB0");
@@ -164,8 +160,6 @@ class WHillNode : public rclcpp::Node
             // TF Options
             this->declare_parameter("publish_tf", true);
             this->get_parameter("publish_tf", publish_tf);
-            this->declare_parameter("publish_base_imu", false);
-            this->get_parameter("publish_base_imu", publish_base_imu);
 
             // speed profile parameter
             this->declare_parameter("init_speed/forward/speed");
@@ -292,14 +286,13 @@ class WHillNode : public rclcpp::Node
 
         rclcpp::Publisher<sensor_msgs::msg::Joy>::SharedPtr whill_joy_publisher_;
         rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr jointstate_publisher_;   
-        rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;     
-        rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr base_imu_publisher_;    
+        rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;       
         rclcpp::Publisher<sensor_msgs::msg::BatteryState>::SharedPtr battery_state_publisher_;
         rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_publisher_;
 
         std::unique_ptr<tf2_ros::TransformBroadcaster> odom_broadcaster_;
 
-        bool publish_tf, publish_base_imu;
+        bool publish_tf;
         rclcpp::Time last_received;
 
     private:
@@ -452,9 +445,6 @@ class WHillNode : public rclcpp::Node
         rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscriber_;
         rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr vel_subscriber_;
 
-        std::shared_ptr<tf2_ros::TransformListener> tf_listener_{nullptr};
-        std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
-
         int axis_ang, axis_lin_x, ton;
         bool keep_connected;
 
@@ -494,24 +484,6 @@ void whill_callback_data1(WHILL *caller)
     imu.linear_acceleration.y = caller->accelerometer.y * 9.80665 * ACC_CONST; // G to m/ssnav_msgs::Odometry odom_msg = odom.getROSOdometry();
     imu.linear_acceleration.z = caller->accelerometer.z * 9.80665 * ACC_CONST; // G to m/ss
     node->imu_publisher_->publish(imu);
-
-    // tf2::Vector3 accel_base = imu_base_transform * tf::Vector3(imu.linear_acceleration.x, imu.linear_acceleration.y, imu.linear_acceleration.z);
-    // tf2::Vector3 gyro_base = imu_base_transform * tf::Vector3(imu.angular_velocity.x, imu.angular_velocity.y, imu.angular_velocity.z);
-
-    // sensor_msgs::msg::Imu imu_base;
-    // imu_base.header.stamp = currentTime;
-    // imu_base.header.frame_id = "base_link";
-
-    // imu_base.linear_acceleration.x = accel_base.x();
-    // imu_base.linear_acceleration.y = accel_base.y();
-    // imu_base.linear_acceleration.z = accel_base.z();
-
-    // imu_base.angular_velocity.x = gyro_base.x();
-    // imu_base.angular_velocity.y = gyro_base.y();
-    // imu_base.angular_velocity.z = gyro_base.z();
-
-    // ros_base_imu_publisher.publish(imu_base);
-
 
     // Battery
     sensor_msgs::msg::BatteryState batteryState;

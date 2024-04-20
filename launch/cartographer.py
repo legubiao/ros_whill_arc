@@ -68,7 +68,7 @@ def generate_launch_description():
         
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                [ThisLaunchFileDir(), '/basic.py'])
+                [ThisLaunchFileDir(), '/basic.launch.py'])
         ),
 
         Node(
