@@ -425,7 +425,6 @@ class WHillNode : public rclcpp::Node
         void cmd_vel_callback(
             const geometry_msgs::msg::Twist::SharedPtr msg)
         {
-            RCLCPP_INFO(this->get_logger(), "Vel Callback");
             if (whill)
             {
                 int linear = msg->linear.x * 100.0f;
