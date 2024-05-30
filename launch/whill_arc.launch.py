@@ -41,8 +41,8 @@ def generate_launch_description():
         ),
         Node(
             package='ros_whill',
-            executable='ros2_whill',
-            name='ros2_whill', 
+            executable='whill_node',
+            name='ros_whill',
             output='screen',
             namespace='whill',
             parameters=[

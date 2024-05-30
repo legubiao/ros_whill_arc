@@ -2,7 +2,7 @@
 This is a modified version of ros_whill for NUS ME5400 ARC project. The main differences comparing with the original version are:
 
 <ul>
-  <li>Tested on ROS2 Foxy</li>
+  <li>Tested on ROS2 Humble</li>
   <li>Modified Joystick Control</li>
   <li>Modified CMD_VEL Control</li>
   <li>Add Lidar to xacro file</li>
@@ -12,19 +12,21 @@ This is a modified version of ros_whill for NUS ME5400 ARC project. The main dif
 </ul>
 
 ## Requirements
-- ROS2 Foxy
-- [serial](https://github.com/ZhaoXiangBox/serial)
+- ROS2 Humbles
+- [serial](https://github.com/ZhaoXiangBox/serial) (If using Fedora and need cource compile)
 
 ## Installation
+### Ubuntu user
 install required ros2 pkg
 ```
-sudo apt-get install ros-foxy-serial-driver ros-foxy-pointcloud-to-laserscan ros-foxy-tf2-sensor-msgs
+sudo apt-get install ros-humble-serial-driver ros-humble-pointcloud-to-laserscan ros-humble-tf2-sensor-msgs
 ```
 
 install ros2 pkg for mapping and navigation
 ```
-sudo apt-get install ros-foxy-sick-scan2 ros-foxy-pcl-ros ros-foxy-cartographer-ros ros-foxy-cartographer ros-foxy-navigation2 ros-foxy-nav2-bringup
+sudo apt-get install ros-humble-sick-scan2 ros-humble-pcl-ros ros-humble-cartographer-ros ros-humble-cartographer ros-humble-navigation2 ros-humble-nav2-bringup
 ```
+
 ## Original Introduction
 ros_whill is a ROS package for [WHILL Model CR](https://whill.jp/model-cr).<br>
 We also have [a FAQ and developers community website](https://whill.zendesk.com/hc/ja) for current and potential Model CR users.<br>
