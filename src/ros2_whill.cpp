@@ -1,6 +1,6 @@
-#include <string.h>
+#include <cstring>
 #include <iostream>
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 
 #include "unistd.h"

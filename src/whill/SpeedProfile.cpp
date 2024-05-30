@@ -25,22 +25,20 @@ THE SOFTWARE.
 /* Author : Hikaru Sugiura */
 
 
-#include "WHILL.h"
-template <typename U, typename T, typename Z>
-bool WHILL::SpeedProfile::checkRange(U min, T value, Z max)
-{
-    if(value < min)return false;
-    if(value > max)return false;
+#include "whill/WHILL.h"
+
+template<typename U, typename T, typename Z>
+bool WHILL::SpeedProfile::checkRange(U min, T value, Z max) {
+    if (value < min)return false;
+    if (value > max)return false;
 
     return true;
 }
 
-WHILL::SpeedProfile::Error WHILL::SpeedProfile::check()
-{  
-
-    if(!checkRange(8,this->forward.speed,60))
+WHILL::SpeedProfile::Error WHILL::SpeedProfile::check() const {
+    if (!checkRange(8, this->forward.speed, 60))
         return InvalidForwardSpeed;
-    if(!checkRange(10, this->forward.acc, 90))
+    if (!checkRange(10, this->forward.acc, 90))
         return InvalidForwardAcc;
     if (!checkRange(40, this->forward.dec, 160))
         return InvalidForwardDec;

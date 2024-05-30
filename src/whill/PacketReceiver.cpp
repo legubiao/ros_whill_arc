@@ -22,20 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "WHILL.h"
+#include "whill/WHILL.h"
 
-int WHILL::PacketReceiver::push(unsigned char data){
-
-    if(!recording){
-        if(data != WHILL::Packet::PROTOCOL_SIGN){
+int WHILL::PacketReceiver::push(const unsigned char data) {
+    if (!recording) {
+        if (data != Packet::PROTOCOL_SIGN) {
             index = 0;
             return -1;
-        }else{
-            recording = true;
         }
+        recording = true;
     }
 
-    if (index > Packet::MAX_LENGTH){
+    if (index > Packet::MAX_LENGTH) {
         // Prevent Buffer Over Run
         index = 0;
         recording = false;
@@ -44,7 +42,7 @@ int WHILL::PacketReceiver::push(unsigned char data){
 
     buf[index] = data;
 
-    if(index >= 1 && remaining_bytes() == 0){
+    if (index >= 1 && remaining_bytes() == 0) {
         call_callback();
         index = 0;
         recording = false;
@@ -55,44 +53,43 @@ int WHILL::PacketReceiver::push(unsigned char data){
     return remaining_bytes();
 }
 
-int WHILL::PacketReceiver::remaining_bytes(){
-    if(index == 0)return -1;
-    if(!recording)return -1;
+int WHILL::PacketReceiver::remaining_bytes() const {
+    if (index == 0)return -1;
+    if (!recording)return -1;
 
-    int length = 2 + buf[1];  // Protocl sign + length + [len](payload + cs)
+    const int length = 2 + buf[1]; // Protocl sign + length + [len](payload + cs)
 
-    return length-(index+1);
+    return length - (index + 1);
 }
 
-void WHILL::PacketReceiver::register_callback(void (*callback)()){
-    this->obj    = NULL;
-    this->method = NULL;
+void WHILL::PacketReceiver::register_callback(void (*callback)()) {
+    this->obj = nullptr;
+    this->method = nullptr;
     this->callback = callback;
 }
 
-void WHILL::PacketReceiver::register_callback(PacketParser* obj,int(PacketParser::*method)(WHILL::Packet* packet)){
+void WHILL::PacketReceiver::register_callback(PacketParser *obj, int (PacketParser::*method)(WHILL::Packet *packet)) {
     this->obj = obj;
     this->method = method;
-    this->callback = NULL;
+    this->callback = nullptr;
 }
 
 
-
-bool WHILL::PacketReceiver::call_callback(){
-
+bool WHILL::PacketReceiver::call_callback() {
     Packet packet;
 
-    if(packet.setRaw(buf,index+1) == false){ // If packet was broken 
+    if (packet.setRaw(buf, index + 1) == false) {
+        // If packet was broken
         return false;
     }
 
 
-    if(callback != NULL){
+    if (callback != nullptr) {
         this->callback();
         return true;
     }
 
-    if(obj != NULL && method != NULL){
+    if (obj != nullptr && method != nullptr) {
         (obj->*method)(&packet);
         return true;
     }

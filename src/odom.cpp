@@ -24,12 +24,12 @@ SOFTWARE.
 #include "geometry_msgs/msg/transform_stamped.hpp"
 
 #include "tf2/LinearMath/Quaternion.h"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 
-#include "./odom.h"
+#include "ros_whill/odom.hpp"
 
-#include <stdio.h>
+#include <cstdio>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -42,6 +42,8 @@ SOFTWARE.
 #include <unistd.h>
 #include <math.h>
 #include <limits>
+
+namespace ros_whill{
 
 const float base_link_height = 0.1325;
 
@@ -159,4 +161,5 @@ geometry_msgs::msg::TransformStamped Odometry::getROSTransformStamped()
     odom_trans.transform.rotation = tf2::toMsg(q);
 
     return odom_trans;
+}
 }

@@ -22,68 +22,65 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "WHILL.h"
+#include "whill/WHILL.h"
 
 #include <cmath>
 
-WHILL::WHILL(int (*read)(std::vector<uint8_t> &data), int (*write)(std::vector<uint8_t> &data), void (*sleep)(uint32_t ms))
-{
-    this->read = read;   // Register UART read interface pointer
+WHILL::WHILL(int (*read)(std::vector<uint8_t> &data), int (*write)(std::vector<uint8_t> &data),
+             void (*sleep)(uint32_t ms)) {
+    this->read = read; // Register UART read interface pointer
     this->write = write; // Register UART write interface pointer
     this->sleep_ms = sleep; // Resigster platform-depended sleep function pointer
 
     parser.setParent(this);
-    receiver.register_callback(&parser,&PacketParser::parsePacket);
+    receiver.register_callback(&parser, &PacketParser::parsePacket);
 }
 
-void WHILL::begin(uint8_t interval)
-{
+void WHILL::begin(uint8_t interval) {
     this->startSendingData1(interval);
     this->past_time_ms = -1;
 }
 
-void WHILL::transferPacket(Packet* packet){
-    unsigned char buffer[Packet::MAX_LENGTH] = {0};
-    int size = packet->getRaw(buffer);
-    std::vector<uint8_t>data(buffer, buffer + size * sizeof(buffer[0]));
+void WHILL::transferPacket(Packet *packet) const {
+    unsigned char buffer[Packet::MAX_LENGTH] = {};
+    const int size = packet->getRaw(buffer);
+    std::vector<uint8_t> data(buffer, buffer + size * sizeof(buffer[0]));
     write(data);
 }
 
-void WHILL::receivePacket(){
+void WHILL::receivePacket() {
     std::vector<uint8_t> data;
-    
-    if(read(data) > 0){
+
+    if (read(data) > 0) {
         size_t size = data.size();
-        for (size_t i = 0; i < size;i++){
+        for (size_t i = 0; i < size; i++) {
             receiver.push(data[i]);
         }
     }
-
 }
 
-void WHILL::refresh(){
+void WHILL::refresh() {
     // Scan the data from interface
     receivePacket();
 }
 
 
-void WHILL::register_callback(Callback method,EVENT event){
+void WHILL::register_callback(Callback method, EVENT event) {
     callback_functions[event] = method;
 }
 
-void WHILL::fire_callback(EVENT event){
-    if(callback_functions[event]==NULL)return;
+void WHILL::fire_callback(EVENT event) {
+    if (callback_functions[event] == nullptr)return;
     callback_functions[event](this);
 }
 
 // Experimental
-uint8_t WHILL::calc_time_diff(uint8_t past, uint8_t current)
-{
+uint8_t WHILL::calc_time_diff(uint8_t past, uint8_t current) {
     // Counts up 0 to 201. If counter exceeds 201, goes to 0.
     int diff = current - past;
     if (abs(diff) >= 100) // Half
     {
         diff = (201 - past) + current;
     }
-    return (uint8_t)diff;
+    return static_cast<uint8_t>(diff);
 }

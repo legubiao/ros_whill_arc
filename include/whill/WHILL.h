@@ -1,4 +1,3 @@
-
 /*
 The MIT License (MIT)
 
@@ -26,16 +25,12 @@ THE SOFTWARE.
 #ifndef __WHILL_H__
 #define __WHILL_H__
 
+#include <cstddef>
 #include <stdint.h>
 #include <vector>
 
-class WHILL
-{
-
-    class Packet
-    {
-
-    private:
+class WHILL {
+    class Packet {
     public:
         const static unsigned char PROTOCOL_SIGN = 0xAF;
 
@@ -46,6 +41,7 @@ class WHILL
         const static int DATASET1_LEN_V02 = 33; // Experimental, Additional timing data from Motor Controller
 
         Packet();
+
         Packet(unsigned char payload[], int size);
 
         unsigned char getCalculatedCS();
@@ -56,96 +52,106 @@ class WHILL
         unsigned char cs;
 
         bool is_valid();
+
         int rawLength();
 
         bool setRaw(unsigned char *raw, int len);
+
         int getRaw(unsigned char *raw);
+
         void build();
     };
 
-    class PacketParser
-    {
+    class PacketParser {
+        WHILL *whill = nullptr;
 
-    private:
-        WHILL *whill = NULL;
         void parseDataset0(WHILL::Packet *packet);
+
         void parseDataset1(WHILL::Packet *packet);
 
     public:
         void setParent(WHILL *whill);
+
         void setWHILLReceiver(WHILL *whill);
+
         int parsePacket(Packet *packet);
     };
 
-    class PacketReceiver
-    {
-
+    class PacketReceiver {
     private:
         unsigned char buf[Packet::MAX_LENGTH] = {0};
         unsigned char index = 0;
         bool recording = false;
 
         void (*callback)() = nullptr;
+
         bool call_callback();
 
         PacketParser *obj = nullptr;
+
         int (PacketParser::*method)(WHILL::Packet *packet) = nullptr;
 
     public:
         int push(unsigned char data);
-        int remaining_bytes();
+
+        int remaining_bytes() const;
+
         void reset();
+
         void register_callback(void (*callback)());
+
         void register_callback(PacketParser *obj, int (PacketParser::*method)(WHILL::Packet *packet));
     };
 
-private:
     // Custom transceiver
-    int (*read)(std::vector<uint8_t> &data);  // Returns how many bytes read actually
+    int (*read)(std::vector<uint8_t> &data); // Returns how many bytes read actually
     int (*write)(std::vector<uint8_t> &data); // Returns how many bytes wrote actually
-    void (*sleep_ms)(uint32_t ms);                      // Sleep function (ms)
+    void (*sleep_ms)(uint32_t ms); // Sleep function (ms)
 
     void receivePacket();
-    void transferPacket(Packet *packet);
+
+    void transferPacket(Packet *packet) const;
 
     PacketReceiver receiver;
     PacketParser parser;
 
     // Experimantal
-    int16_t past_time_ms = -1;  // not received any data yet if negative
+    int16_t past_time_ms = -1; // not received any data yet if negative
     static uint8_t calc_time_diff(uint8_t past, uint8_t current);
 
 public:
-    WHILL(int (*read)(std::vector<uint8_t> &data), int (*write)(std::vector<uint8_t> &data), void (*sleep)(uint32_t ms));
+    WHILL(int (*read)(std::vector<uint8_t> &data), int (*write)(std::vector<uint8_t> &data),
+          void (*sleep)(uint32_t ms));
+
     void begin(uint8_t interval);
 
     const float wheel_radius = 0.1325;
     const float tread = 0.496;
 
     //Callback
-    enum EVENT
-    {
+    enum EVENT {
         CALLBACK_DATA0,
         CALLBACK_DATA1,
         CALLBACK_POWER_ON,
         EVENT_SIZE
     };
+
     typedef void (*Callback)(WHILL *);
+
     Callback callback_functions[EVENT_SIZE] = {NULL};
+
     void register_callback(Callback method, EVENT event);
+
     void fire_callback(EVENT event);
 
     void refresh();
 
-    class SpeedProfile
-    {
-    private:
-        template <typename U,typename T,typename Z>
-        bool checkRange(U min, T value, Z max);
+    class SpeedProfile {
+        template<typename U, typename T, typename Z>
+        static bool checkRange(U min, T value, Z max);
 
     public:
-        enum Error
-        {
+        enum Error {
             NoError,
             InvalidForwardSpeed,
             InvalidBackwardSpeed,
@@ -158,41 +164,37 @@ public:
             InvalidTurnDec,
         };
 
-        class Pack
-        {
-            public:
+        class Pack {
+        public:
             uint8_t speed;
             uint8_t acc;
             uint8_t dec;
         };
-        
-        Error check();
+
+        Error check() const;
+
         Pack forward;
         Pack backward;
         Pack turn;
     };
 
-    typedef struct
-    {
+    typedef struct {
         int x;
         int y;
         int z;
     } Data3D;
 
-    typedef struct
-    {
+    typedef struct {
         int x;
         int y;
     } Joy;
 
-    typedef struct
-    {
+    typedef struct {
         unsigned char level;
         signed long current;
     } Battery;
 
-    typedef struct
-    {
+    typedef struct {
         float angle;
         int speed;
     } Motor;
@@ -213,11 +215,17 @@ public:
 
     //WHILL commands
     void startSendingData0(unsigned int interval_ms, unsigned char speed_mode);
+
     void startSendingData1(unsigned int interval_ms);
+
     void stopSendingData();
+
     void setJoystick(int x, int y);
+
     void setPower(bool power);
+
     void setBatteryVoltaegeOut(bool out);
+
     bool setSpeedProfile(SpeedProfile &profile, unsigned char speed_mode);
 
     // Experimental

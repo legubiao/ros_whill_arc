@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "WHILL.h"
-#include <string.h>
+#include "whill/WHILL.h"
+#include <cstring>
 
 WHILL::Packet::Packet(){
   protocol_sign = 0xAF;
