@@ -26,7 +26,7 @@ SOFTWARE.
 
 namespace ros_whill {
     class Odometry {
-        long double confineRadian(long double rad);
+        static long double confineRadian(long double rad);
 
         typedef struct {
             long double x;

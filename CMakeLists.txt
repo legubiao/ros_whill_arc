@@ -58,19 +58,19 @@ rosidl_get_typesupport_target(cpp_typesupport_target
         ${PROJECT_NAME} rosidl_typesupport_cpp)
 target_link_libraries(whill_node lib_whill "${cpp_typesupport_target}")
 
-#add_executable(scan_fusion src/scan_fusion.cpp)
-#ament_target_dependencies(scan_fusion
-#        rclcpp
-#        sensor_msgs
-#        laser_geometry
-#        sensor_msgs
-#        tf2_ros
-#        PCL
-#        pcl_conversions)
+add_executable(scan_fusion src/scan_fusion.cpp)
+ament_target_dependencies(scan_fusion
+        rclcpp
+        sensor_msgs
+        laser_geometry
+        sensor_msgs
+        tf2_ros
+        PCL
+        pcl_conversions)
 
 install(TARGETS
         whill_node
-#        scan_fusion
+        scan_fusion
         DESTINATION lib/${PROJECT_NAME})
 
 if (BUILD_TESTING)

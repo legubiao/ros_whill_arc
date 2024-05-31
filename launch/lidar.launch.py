@@ -1,6 +1,7 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
+
 def generate_launch_description():
     return LaunchDescription([
         Node(
@@ -12,9 +13,9 @@ def generate_launch_description():
                 {'scanner_name': 'sick_tim_5xx'},
                 {'hostname': '172.16.127.11'},
                 {'port': 2112},
-                {'min_ang': -1.10},
-                {'max_ang': 2.00},
-                {'max_range' : 10.0},
+                {'min_ang': 0.0},
+                {'max_ang': 3.141},
+                {'max_range': 10.0},
                 {'frame_id': 'left_lidar'},
             ],
             remappings=[
@@ -32,9 +33,9 @@ def generate_launch_description():
                 {'scanner_name': 'sick_tim_5xx'},
                 {'hostname': '172.16.127.10'},
                 {'port': 2112},
-                {'min_ang': -1.10},
-                {'max_ang': 2.00},
-                {'max_range' : 10.0},
+                {'min_ang': 0.0},
+                {'max_ang': 3.141},
+                {'max_range': 10.0},
                 {'frame_id': 'right_lidar'},
             ],
             remappings=[
@@ -51,6 +52,7 @@ def generate_launch_description():
             parameters=[
                 {'target_frame': 'base_link'},
                 {'fused_cloud_topic': 'fused_cloud'},
+                {'input_type': 'LaserScan'},
                 {'scan_topics': ['/left_lidar', '/right_lidar']}
             ]
         ),

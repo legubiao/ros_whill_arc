@@ -23,12 +23,13 @@ from launch.substitutions import LaunchConfiguration
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import ThisLaunchFileDir
+from launch.conditions import IfCondition
 
 
 def generate_launch_description():
     cartographer_prefix = get_package_share_directory('ros_whill')
     cartographer_config_dir = LaunchConfiguration('cartographer_config_dir', default=os.path.join(
-                                                  cartographer_prefix, 'config'))
+        cartographer_prefix, 'config'))
     configuration_basename = LaunchConfiguration('configuration_basename',
                                                  default='cartographer.lua')
 
@@ -37,6 +38,8 @@ def generate_launch_description():
 
     rviz_config_dir = os.path.join(get_package_share_directory('ros_whill'),
                                    'rviz', 'whill_cartographer.rviz')
+
+    include_basic_launch = LaunchConfiguration('include_basic_launch', default='true')
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -47,6 +50,10 @@ def generate_launch_description():
             'configuration_basename',
             default_value=configuration_basename,
             description='Name of lua file for cartographer'),
+        DeclareLaunchArgument(
+            'include_basic_launch',
+            default_value='true',
+            description='Whether to include basic.launch.py'),
 
         Node(
             package='cartographer_ros',
@@ -65,16 +72,17 @@ def generate_launch_description():
             'publish_period_sec',
             default_value=publish_period_sec,
             description='OccupancyGrid publishing period'),
-        
+
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                [ThisLaunchFileDir(), '/basic.launch.py'])
+                [ThisLaunchFileDir(), '/basic.launch.py']),
+            condition=IfCondition(include_basic_launch)
         ),
 
         Node(
             package='cartographer_ros',
-            executable='occupancy_grid_node',
-            name='occupancy_grid_node',
+            executable='cartographer_occupancy_grid_node',
+            name='cartographer_occupancy_grid_node',
             output='screen',
             arguments=['-resolution', resolution, '-publish_period_sec', publish_period_sec]),
 

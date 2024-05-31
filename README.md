@@ -27,7 +27,12 @@ install ros2 pkg for mapping and navigation
 sudo apt-get install ros-humble-sick-scan2 ros-humble-pcl-ros ros-humble-cartographer-ros ros-humble-cartographer ros-humble-navigation2 ros-humble-nav2-bringup
 ```
 
-## Original Introduction
+### Fedora User
+- [serial](https://github.com/ZhaoXiangBox/serial)
+- [sick_scan2](https://github.com/SICKAG/sick_scan2)
+
+## Original Introducti- [sick_scan2]- [serial](https://github.com/ZhaoXiangBox/serial) (If using Fedora and need cource compile)
+on
 ros_whill is a ROS package for [WHILL Model CR](https://whill.jp/model-cr).<br>
 We also have [a FAQ and developers community website](https://whill.zendesk.com/hc/ja) for current and potential Model CR users.<br>
 For general questions and requests, please visit https://whill.zendesk.com/hc/ja .

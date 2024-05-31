@@ -3,8 +3,8 @@ from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 import os
 
-def generate_launch_description():
 
+def generate_launch_description():
     # Robot Description
     xacro_file_name = 'modelc_with_lidar.xacro'
     xacro = os.path.join(
@@ -20,9 +20,9 @@ def generate_launch_description():
         get_package_share_directory('ros_whill'),
         'params',
         'initial_speedprofile.yaml'
-        )
+    )
     print(whill_speed_config)
-    
+
     return LaunchDescription([
         Node(
             package='robot_state_publisher',
@@ -49,7 +49,7 @@ def generate_launch_description():
                 whill_speed_config,
                 {'send_interval': 10}
             ],
-                remappings=[
+            remappings=[
                 ('/whill/controller/joy', '/joy'),
                 ('/whill/controller/cmd_vel', '/cmd_vel'),
                 ('/whill/states/odom', '/odom')

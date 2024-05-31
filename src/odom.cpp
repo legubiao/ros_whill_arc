@@ -30,136 +30,116 @@ SOFTWARE.
 #include "ros_whill/odom.hpp"
 
 #include <cstdio>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <netdb.h>
-#include <fcntl.h>
 #include <sys/epoll.h>
-#include <unistd.h>
-#include <math.h>
-#include <limits>
 
-namespace ros_whill{
+namespace ros_whill {
+    constexpr float base_link_height = 0.1325;
 
-const float base_link_height = 0.1325;
-
-Odometry::Odometry()
-{
-    pose.x = pose.y = pose.theta = 0.0;
-    velocity.x = velocity.y = velocity.theta = 0.0;
-}
-
-long double Odometry::confineRadian(long double rad)
-{
-    if (rad >= M_PI)
-    {
-        rad -= 2.0 * M_PI;
+    Odometry::Odometry() {
+        pose.x = pose.y = pose.theta = 0.0;
+        velocity.x = velocity.y = velocity.theta = 0.0;
     }
-    if (rad <= -M_PI)
-    {
-        rad += 2.0 * M_PI;
+
+    long double Odometry::confineRadian(long double rad) {
+        if (rad >= M_PI) {
+            rad -= 2.0 * M_PI;
+        }
+        if (rad <= -M_PI) {
+            rad += 2.0 * M_PI;
+        }
+        return rad;
     }
-    return rad;
-}
 
-void Odometry::setParameters(double _wheel_radius, double _wheel_tread){
-    this->wheel_radius = _wheel_radius;
-    this->wheel_tread = _wheel_tread;
-}
+    void Odometry::setParameters(double _wheel_radius, double _wheel_tread) {
+        this->wheel_radius = _wheel_radius;
+        this->wheel_tread = _wheel_tread;
+    }
 
-void Odometry::update(sensor_msgs::msg::JointState jointState, double dt)
-{
-    if (dt == 0)
+    void Odometry::update(sensor_msgs::msg::JointState jointState, double dt) {
+        if (dt == 0)
+            return;
+
+        double angle_vel_r = jointState.velocity[1];
+        double angle_vel_l = -jointState.velocity[0];
+
+        long double vr = angle_vel_r * wheel_radius;
+        long double vl = angle_vel_l * wheel_radius;
+
+        long double delta_L = (vr + vl) / 2.0;
+        long double delta_theta = (vr - vl) / (wheel_tread);
+
+        pose.x += delta_L * dt * cosl(pose.theta + delta_theta * dt / 2.0);
+        pose.y += delta_L * dt * sinl(pose.theta + delta_theta * dt / 2.0);
+
+        velocity.x = delta_L;
+        velocity.y = 0.0;
+        velocity.theta = delta_theta;
+
+        double theta = pose.theta + delta_theta * dt;
+        pose.theta = confineRadian(theta);
+
         return;
+    }
 
-    double angle_vel_r = jointState.velocity[1];
-    double angle_vel_l = -jointState.velocity[0];
+    void Odometry::zeroVelocity() {
+        velocity.x = 0;
+        velocity.y = 0;
+        velocity.theta = 0;
+    }
 
-    long double vr = angle_vel_r * wheel_radius;
-    long double vl = angle_vel_l * wheel_radius;
+    void Odometry::reset() {
+        Space2D poseZero = {0, 0, 0};
+        set(poseZero);
+        velocity = poseZero;
+    }
 
-    long double delta_L = (vr + vl) / 2.0;
-    long double delta_theta = (vr - vl) / (wheel_tread);
+    void Odometry::set(Space2D pose) {
+        this->pose = pose;
+    }
 
-    pose.x += delta_L * dt * cosl(pose.theta + delta_theta * dt / 2.0);
-    pose.y += delta_L * dt * sinl(pose.theta + delta_theta * dt / 2.0);
+    Odometry::Space2D Odometry::getOdom() {
+        return pose;
+    }
 
-    velocity.x = delta_L;
-    velocity.y = 0.0;
-    velocity.theta = delta_theta;
+    nav_msgs::msg::Odometry Odometry::getROSOdometry() {
+        nav_msgs::msg::Odometry odom;
 
-    double theta = pose.theta + delta_theta * dt;
-    pose.theta = confineRadian(theta);
+        tf2::Quaternion q;
+        q.setRPY(0, 0, pose.theta);
+        geometry_msgs::msg::Quaternion odom_quat = tf2::toMsg(q);
 
-    return;
-}
+        // position
+        odom.pose.pose.position.x = pose.x;
+        odom.pose.pose.position.y = pose.y;
+        odom.pose.pose.position.z = base_link_height;
+        odom.pose.pose.orientation = odom_quat;
 
-void Odometry::zeroVelocity(void){
-    velocity.x = 0;
-    velocity.y = 0;
-    velocity.theta = 0;
-    return;
-}
+        //velocity
+        odom.twist.twist.linear.x = velocity.x;
+        odom.twist.twist.linear.y = velocity.y;
+        odom.twist.twist.linear.z = 0.0;
+        odom.twist.twist.angular.x = 0.0;
+        odom.twist.twist.angular.y = 0.0;
+        odom.twist.twist.angular.z = velocity.theta;
 
-void Odometry::reset()
-{
-    Space2D poseZero = {0, 0, 0};
-    set(poseZero);
-    velocity = poseZero;
-}
+        return odom;
+    }
 
-void Odometry::set(Space2D pose)
-{
-    this->pose = pose;
-}
+    geometry_msgs::msg::TransformStamped Odometry::getROSTransformStamped() {
+        geometry_msgs::msg::TransformStamped odom_trans;
 
-Odometry::Space2D Odometry::getOdom()
-{
-    return pose;
-}
+        odom_trans.transform.translation.x = pose.x;
+        odom_trans.transform.translation.y = pose.y;
+        odom_trans.transform.translation.z = base_link_height;
 
-nav_msgs::msg::Odometry Odometry::getROSOdometry()
-{
-    nav_msgs::msg::Odometry odom;
+        tf2::Quaternion q;
+        q.setRPY(0, 0, pose.theta);
+        odom_trans.transform.rotation = toMsg(q);
 
-    tf2::Quaternion q;
-    q.setRPY(0, 0, pose.theta);
-    geometry_msgs::msg::Quaternion odom_quat = tf2::toMsg(q);
-
-    // position
-    odom.pose.pose.position.x = pose.x;
-    odom.pose.pose.position.y = pose.y;
-    odom.pose.pose.position.z = base_link_height;
-    odom.pose.pose.orientation = odom_quat;
-
-    //velocity
-    odom.twist.twist.linear.x = velocity.x;
-    odom.twist.twist.linear.y = velocity.y;
-    odom.twist.twist.linear.z = 0.0;
-    odom.twist.twist.angular.x = 0.0;
-    odom.twist.twist.angular.y = 0.0;
-    odom.twist.twist.angular.z = velocity.theta;
-
-    return odom;
-}
-
-geometry_msgs::msg::TransformStamped Odometry::getROSTransformStamped()
-{
-
-    geometry_msgs::msg::TransformStamped odom_trans;
-
-    odom_trans.transform.translation.x = pose.x;
-    odom_trans.transform.translation.y = pose.y;
-    odom_trans.transform.translation.z = base_link_height;
-
-    tf2::Quaternion q;
-    q.setRPY(0, 0, pose.theta);
-    odom_trans.transform.rotation = tf2::toMsg(q);
-
-    return odom_trans;
-}
+        return odom_trans;
+    }
 }

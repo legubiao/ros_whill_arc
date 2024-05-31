@@ -12,7 +12,7 @@ ros_whill:
       backward:
         speed: 0.600  # [m/s]
         acc: 0.34     # [m/ss]
-        dec: 0.89     # [m/ss]
+        dec: 0.89     # [m/ss]初步实现连接
       turn:
         speed: 0.8    # [rad/s]
         acc: 0.79     # [rad/ss]
